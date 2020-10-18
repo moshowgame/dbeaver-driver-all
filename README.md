@@ -1,13 +1,21 @@
 # DBeaver-Driver-All
+```bash
+____________                            ______      _                    
+|  _  \ ___ \                           |  _  \    (_)                   
+| | | | |_/ / ___  __ ___   _____ _ __  | | | |_ __ ___   _____ _ __ ___ 
+| | | | ___ \/ _ \/ _` \ \ / / _ \ '__| | | | | '__| \ \ / / _ \ '__/ __|
+| |/ /| |_/ /  __/ (_| |\ V /  __/ |    | |/ /| |  | |\ V /  __/ |  \__ \
+|___/ \____/ \___|\__,_| \_/ \___|_|    |___/ |_|  |_| \_/ \___|_|  |___/
+```
 `DBeaver-Driver-All` ( `DBeaver驱动包` )整合所有DBeaver的JDBC驱动包，供DBeaver使用，无需每次都搜索和下载，只需clone本项目即可，一个包包含几乎所有的驱动，如果有缺漏的驱动欢迎提Issue补充。
 
 >`DBeaver-Driver-All`, a `DBeaver JDBC Driver Package` , contains all jdbc drivers for dbeaver,no need to download it everytime ,all drivers in one package .
 
 # Author
-Powered by Moshow郑锴@[zhengkai.blog.csdn.net](zhengkai.blog.csdn.net)
+Powered by Moshow郑锴@[zhengkai.blog.csdn.net](http://zhengkai.blog.csdn.net)
 
 # Version
-Dbeaver:`7.1.0`
+Dbeaver : `7.2.0` 
 
 # 包含JDBC驱动列表(jdbc driver list)
 - CacheDB.jar
@@ -25,6 +33,7 @@ Dbeaver:`7.1.0`
 - lz4-1.3.0.jar
 - slf4j-api-1.7.21.jar
 - csvjdbc-1.0.35.jar
+- csvjdbc-1.0.37.jar
 - dans-dbf-lib-1.0.0-beta-10.jar
 - db2jcc4.jar
 - jt400.jar
@@ -60,6 +69,20 @@ Dbeaver:`7.1.0`
 - xmlparserv2.jar
 - postgis-jdbc-2.2.1.jar
 - postgresql-42.2.5.jar
+- aws-java-sdk-core-1.11.118.jar
+- aws-java-sdk-redshift-1.11.118.jar
+- aws-java-sdk-sts-1.11.118.jar
+- commons-codec-1.9.jar
+- commons-logging-1.1.3.jar
+- httpclient-4.5.2.jar
+- httpcore-4.4.4.jar
+- jackson-annotations-2.10.1.jar
+- jackson-core-2.10.1.jar
+- jackson-databind-2.10.1.jar
+- jackson-dataformat-cbor-2.10.1.jar
+- joda-time-2.8.1.jar
+- log4j-1.2.17.jar
+- RedshiftJDBC42-no-awssdk-1.2.47.1071.jar
 - sqlite-jdbc-3.30.1.jar
 - jconn4.jar
 - tdgssconfig.jar
@@ -89,3 +112,9 @@ Get-ChildItem "D:\workspace\java\dbeaver-driver-all\drivers" -Include *.jar -Rec
     }
 }
 ```
+
+#Update Log
+|更新时间|版本|
+|----|----|
+|2020-10-18|update to 7.2.0|
+|2020-07-09|update to 7.1.0|

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.microsoft.sqlserver</groupId>
+    <artifactId>mssql-jdbc_auth</artifactId>
+    <version>9.2.0.x64</version>
+    <packaging>dll</packaging>
+    <name>Microsoft JDBC Driver for SQL Server Authentication Library for Windows</name>
+    <description>Microsoft JDBC Driver for SQL Server Authentication Library for Windows</description>
+    <url>https://github.com/Microsoft/mssql-jdbc</url>
+    <licenses>
+        <license>
+            <name>Microsoft Proprietary License</name>
+            <url>https://raw.githubusercontent.com/microsoft/mssql-jdbc/v9.2.0/mssql-jdbc_auth_LICENSE</url>
+        </license>
+    </licenses>
+    <organization>
+        <name>Microsoft Corporation</name>
+    </organization>
+    <developers>
+        <developer>
+            <organization>Microsoft</organization>
+            <organizationUrl>http://www.microsoft.com</organizationUrl>
+        </developer>
+    </developers>
+    <scm>
+        <url>https://github.com/Microsoft/mssql-jdbc</url>
+    </scm>
+</project>

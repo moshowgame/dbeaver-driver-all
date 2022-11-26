@@ -1,0 +1,384 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.postgresql</groupId>
+        <artifactId>pgjdbc-versions</artifactId>
+        <version>1.1.6</version>
+        <relativePath>../pgjdbc-versions</relativePath>
+    </parent>
+
+    <artifactId>pgjdbc-core-parent</artifactId>
+    <packaging>pom</packaging>
+    <name>PostgreSQL JDBC Driver - build skeleton pom</name>
+    <description>PgJDBC build configuration for highest supported Java</description>
+
+    <properties>
+        <template.default.pg.port>5432</template.default.pg.port>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <postgresql.jdbc.spec>JDBC${jdbc.specification.version}</postgresql.jdbc.spec>
+        <postgresql.enforce.jdk.version>1.8</postgresql.enforce.jdk.version>
+        <javac.target>1.8</javac.target>
+        <skip.assembly>true</skip.assembly>
+        <build.properties.relative.path>${basedir}/..</build.properties.relative.path>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>se.jiderhamn</groupId>
+            <artifactId>classloader-leak-test-framework</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>waffle-deps</id>
+            <activation>
+                <property>
+                    <name>waffleEnabled</name>
+                    <value>!false</value>
+                </property>
+            </activation>
+            <properties>
+                <waffleEnabled>true</waffleEnabled>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>com.github.waffle</groupId>
+                    <artifactId>waffle-jna</artifactId>
+                    <scope>compile</scope>
+                    <optional>true</optional>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>osgi-deps</id>
+            <activation>
+                <property>
+                    <name>osgiEnabled</name>
+                    <value>!false</value>
+                </property>
+            </activation>
+            <properties>
+                <osgiEnabled>true</osgiEnabled>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.enterprise</artifactId>
+                    <scope>provided</scope>
+                    <optional>true</optional>
+                </dependency>
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.core</artifactId>
+                    <scope>provided</scope>
+                    <optional>true</optional>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>release-artifacts</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>../pgjdbc/src/assembly/dist.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>make-assembly</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <skipAssembly>${skip.assembly}</skipAssembly>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>build-core</id>
+            <activation>
+                <file>
+                    <missing>../pgjdbc-versions</missing>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>initialize</phase>
+                                <id>parse-version</id>
+                                <goals>
+                                    <goal>parse-version</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>enforce-java</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireJavaVersion>
+                                            <version>${postgresql.enforce.jdk.version}</version>
+                                        </requireJavaVersion>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>properties-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>read-project-properties</goal>
+                                </goals>
+                                <configuration>
+                                    <files>
+                                        <file>${build.properties.relative.path}/build.properties</file>
+                                        <file>${build.properties.relative.path}/build.local.properties</file>
+                                    </files>
+                                    <quiet>true</quiet>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.igormaznitsa</groupId>
+                        <artifactId>jcp</artifactId>
+                    </plugin>
+                    <plugin>
+                        <!-- These executions will be overriden in pgjdbc-jreX to delete source directories.
+                             It avoids the hassle of adding the excludes of jre8 to all the sources/javadoc/compile/etc Maven plugins -->
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>remove-future-jre-sources</id>
+                                <goals>
+                                    <goal>clean</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <!-- Do not delete target folder -->
+                                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>remove-future-jre-test-sources</id>
+                                <goals>
+                                    <goal>clean</goal>
+                                </goals>
+                                <phase>generate-test-sources</phase>
+                                <configuration>
+                                    <!-- Do not delete target folder -->
+                                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration combine.children="append">
+                            <systemPropertyVariables>
+                                <build.properties.relative.path>${build.properties.relative.path}</build.properties.relative.path>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                </manifest>
+                                <manifestEntries>
+                                    <Main-Class>org.postgresql.util.PGJDBCMain</Main-Class>
+                                    <Specification-Title>JDBC</Specification-Title>
+                                    <Specification-Version>${jdbc.specification.version}</Specification-Version>
+                                    <Specification-Vendor>Oracle Corporation</Specification-Vendor>
+                                </manifestEntries>
+                                <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                            </archive>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.felix</groupId>
+                        <artifactId>maven-bundle-plugin</artifactId>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <instructions>
+                                <Export-Package>org.postgresql*; version=${parsedVersion.osgiVersion}</Export-Package>
+                                <Import-Package>javax.sql, javax.transaction.xa, javax.naming, javax.security.sasl;resolution:=optional, *;resolution:=optional
+                                </Import-Package>
+                                <Bundle-Activator>org.postgresql.osgi.PGBundleActivator</Bundle-Activator>
+                                <Bundle-SymbolicName>org.postgresql.jdbc${jdbc.specification.version.nodot}
+                                </Bundle-SymbolicName>
+                                <Bundle-Name>PostgreSQL JDBC Driver JDBC${jdbc.specification.version.nodot}
+                                </Bundle-Name>
+                                <Bundle-Copyright>Copyright (c) 2003-2015, PostgreSQL Global Development Group
+                                </Bundle-Copyright>
+                                <Require-Capability>osgi.ee;filter:="(&amp;(|(osgi.ee=J2SE)(osgi.ee=JavaSE))(version&gt;=${javac.target}))"</Require-Capability>
+                                <Provide-Capability>osgi.service;effective:=active;objectClass=org.osgi.service.jdbc.DataSourceFactory</Provide-Capability>
+                            </instructions>
+                        </configuration>
+                    </plugin>
+                </plugins>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-javadoc-plugin</artifactId>
+                            <configuration>
+                                <sourcepath>${postgresql.preprocessed.sources.directory};${project.build.directory}/jdk-src</sourcepath>
+                                <subpackages>org.postgresql</subpackages>
+                                <maxmemory>2g</maxmemory>
+                                <tags>
+                                    <tag>
+                                        <!-- @jls appears in the java.lang.Object, so we just ignore it -->
+                                        <name>jls</name>
+                                        <!-- The value X makes javadoc ignoring the tag -->
+                                        <placement>X</placement>
+                                    </tag>
+                                </tags>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+
+        <profile>
+            <id>release</id>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <!-- This unzips JDK sources to target/jdk-src.
+                                     It is done somewhat tricky since we need to detect proper JAVA_HOME.
+                                     Proper java is set via maven-toolchains-plugin, so maven-antrun-plugin cannot
+                                     be used (it does not support toolchains) -->
+                                <id>unzip-jdk-src</id>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>enforce-java</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>true</skip>
+                                    <rules />
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-toolchains-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>toolchain</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>mvn-release-perform</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <!--
+                Release of prev builds is invoked from pgjdbc-jreX subfolders.
+                workingDirectory = /.../code/pgjdbc/target/checkout/pgjdbc
+                build.properties.relative.path should target to pgjdbc, so 3 '..'
+                -->
+                <build.properties.relative.path>../../..</build.properties.relative.path>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>skip-unzip-jdk</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unzip-jdk-src</id>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

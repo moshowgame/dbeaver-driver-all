@@ -1,0 +1,501 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.postgresql</groupId>
+    <artifactId>pgjdbc-versions</artifactId>
+    <packaging>pom</packaging>
+    <name>PostgreSQL JDBC Driver - superpom</name>
+    <version>1.1.6</version>
+    <description>Sets up base plugin configuration and dependency versions</description>
+    <url>https://github.com/pgjdbc/pgjdbc-parent-poms</url>
+
+    <licenses>
+        <license>
+            <name>The PostgreSQL License</name>
+            <url>http://www.postgresql.org/about/licence/</url>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>PostgreSQL Global Development Group</name>
+        <url>http://jdbc.postgresql.org/</url>
+    </organization>
+
+    <developers>
+        <developer>
+            <id>davecramer</id>
+            <name>Dave Cramer</name>
+        </developer>
+        <developer>
+            <id>jurka</id>
+            <name>Kris Jurka</name>
+        </developer>
+        <developer>
+            <id>oliver</id>
+            <name>Oliver Jowett</name>
+        </developer>
+        <developer>
+            <id>ringerc</id>
+            <name>Craig Ringer</name>
+        </developer>
+        <developer>
+            <id>vlsi</id>
+            <name>Vladimir Sitnikov</name>
+        </developer>
+    </developers>
+
+    <!-- If inherited from parent pom, maven tries to add artifactId to URLs -->
+    <scm>
+        <url>https://github.com/pgjdbc/pgjdbc-parent-poms</url>
+        <connection>scm:git:https://github.com/pgjdbc/pgjdbc-parent-poms.git</connection>
+        <developerConnection>scm:git:git@github.com:pgjdbc/pgjdbc-parent-poms.git</developerConnection>
+      <tag>REL1.1.6</tag>
+  </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh-snapshots</id>
+            <name>ossrh-snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <name>ossrh-releases</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+    </distributionManagement>
+
+    <properties>
+        <template.default.pg.port>5432</template.default.pg.port>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <waffle-jna.version>1.9.1</waffle-jna.version>
+        <postgresql.jdbc.spec>JDBC${jdbc.specification.version}</postgresql.jdbc.spec>
+        <postgresql.driver.fullversion>PostgreSQL ${postgresql.jdbc.spec}</postgresql.driver.fullversion>
+        <postgresql.preprocessed.sources.directory>${project.build.directory}/gen-src</postgresql.preprocessed.sources.directory>
+        <postgresql.preprocessed.test.sources.directory>${project.build.directory}/gen-test-src</postgresql.preprocessed.test.sources.directory>
+        <unzip.jdk.ant.build.xml>${project.build.directory}/unzip-jdk-ant.xml</unzip.jdk.ant.build.xml>
+        <skip.unzip-jdk-src>true</skip.unzip-jdk-src>
+        <!-- Configuration for maven-surefire-plugin. Needs to be here for compatibility with jacoco -->
+        <argLine>-Xmx512m</argLine>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.igormaznitsa</groupId>
+                    <artifactId>jcp</artifactId>
+                    <version>6.0.1</version>
+                    <executions>
+                        <execution>
+                            <id>preprocessSources</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>preprocess</goal>
+                            </goals>
+                            <configuration>
+                                <!-- generated-sources is not used, otherwise IDEA picks sources from both src and generated-sources,
+                                 and produces lots of "duplicate class" errors -->
+                                <destination>${postgresql.preprocessed.sources.directory}</destination>
+                                <compareDestination>true</compareDestination>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>preprocessTestSources</id>
+                            <phase>generate-test-sources</phase>
+                            <goals>
+                                <goal>preprocess</goal>
+                            </goals>
+                            <configuration>
+                                <!-- generated-sources is not used, otherwise IDEA picks sources from both src and generated-sources,
+                                 and produces lots of "duplicate class" errors -->
+                                <testDestination>${postgresql.preprocessed.test.sources.directory}</testDestination>
+                                <compareDestination>true</compareDestination>
+                                <useTestSources>true</useTestSources>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>1.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>properties-maven-plugin</artifactId>
+                    <version>1.0-alpha-2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>2.5</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>2.6</version>
+                    <configuration>
+                        <nonFilteredFileExtensions>
+                            <!-- This is for META-INF/services/java.sql.Driver -->
+                            <nonFilteredFileExtension>driver</nonFilteredFileExtension>
+                            <!-- This is for src/main/resources/org/postgresql/translation/messages_XX.class -->
+                            <nonFilteredFileExtension>class</nonFilteredFileExtension>
+                        </nonFilteredFileExtensions>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.5.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-toolchains-plugin</artifactId>
+                    <version>1.1</version>
+                    <configuration>
+                        <toolchains>
+                            <jdk>
+                                <version>${javac.target}</version>
+                            </jdk>
+                        </toolchains>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.3</version>
+                    <configuration>
+                        <source>${javac.target}</source>
+                        <target>${javac.target}</target>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>1.3.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>2.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.18.1</version>
+                    <configuration>
+                        <includes>
+                            <include>**/*TestSuite*.class</include>
+                        </includes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                    <version>2.8</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.6</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>1.7</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>1.4.0</version>
+                    <executions>
+                        <execution>
+                            <!-- This unzips JDK sources to target/jdk-src.
+                                 It is done somewhat tricky since we need to detect proper JAVA_HOME.
+                                 Proper java is set via maven-toolchains-plugin, so maven-antrun-plugin cannot
+                                 be used (it does not support toolchains) -->
+                            <id>unzip-jdk-src</id>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                            <configuration>
+                                <skip>${skip.unzip-jdk-src}</skip>
+                                <executable>java</executable>
+                                <arguments>
+                                    <argument>-classpath</argument>
+                                    <argument>${settings.localRepository}/org/apache/ant/ant/1.8.2/ant-1.8.2.jar${path.separator}${settings.localRepository}/org/apache/ant/ant-launcher/1.8.2/ant-launcher-1.8.2.jar</argument>
+                                    <argument>-Dproject.build.directory=${project.build.directory}</argument>
+                                    <argument>org.apache.tools.ant.Main</argument>
+                                    <argument>-f</argument>
+                                    <argument>${unzip.jdk.ant.build.xml}</argument>
+                                </arguments>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.ant</groupId>
+                            <artifactId>ant</artifactId>
+                            <version>1.8.2</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.apache.ant</groupId>
+                            <artifactId>ant-launcher</artifactId>
+                            <version>1.8.2</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.0.1</version>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.4</version>
+                    <executions>
+                        <!-- here we override the super-pom attach-sources executionid which
+                        calls sources:jar goal. That goals forks the lifecycle, causing
+                        the generate-sources phase to be called twice for the install goal.
+                        This causes any other plugin bound to the generate-sources phase to
+                        be called twice which usually has nasty side effects, let alone
+                        creating duplicate processing and longer build times. -->
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>none</phase>
+                        </execution>
+                        <execution>
+                            <id>attach-sources-no-fork</id>
+                            <inherited>true</inherited>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.6</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>1.6</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.5.1</version>
+                    <configuration>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <releaseProfiles>release-artifacts,release</releaseProfiles>
+                        <tagNameFormat>REL@{project.version}</tagNameFormat>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.maven.scm</groupId>
+                            <artifactId>maven-scm-provider-gitexe</artifactId>
+                            <version>1.9.2</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>1.6.5</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <serverId>ossrh</serverId>
+                        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <!-- 2.5.4 causes all the build steps to be executed twice: https://issues.apache.org/jira/browse/FELIX-4882 -->
+                    <version>2.5.3</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>biz.aQute.bnd</groupId>
+                            <artifactId>bndlib</artifactId>
+                            <version>2.4.0</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.12</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.waffle</groupId>
+                <artifactId>waffle-jna</artifactId>
+                <version>${waffle-jna.version}</version>
+                <!--
+                 We want to force most of Waffle's transitive dependencies to runtime
+                 dependencies so we can't accidentally depend on their contents at
+                 compile time. So exclude them from the compile dependencies, then
+                 declare another runtime dependency on waffle-jna without these
+                 exclusions later.
+                -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-simple</artifactId>
+                    </exclusion>
+                </exclusions>
+                <!--
+                 Note that we do NOT exclude net.java.dev.jna:jna or
+                 net.java.dev.jna:jna-platform since we intentionally use the one
+                 Waffle exposes.
+                -->
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>4.3.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.enterprise</artifactId>
+                <version>4.2.0</version>
+            </dependency>
+            <dependency>
+                <groupId>se.jiderhamn</groupId>
+                <artifactId>classloader-leak-test-framework</artifactId>
+                <version>1.1.1</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>create-unzipjdkant.xml</id>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <target>
+                                        <echo message="Generating ${unzip.jdk.ant.build.xml}" />
+                                        <!-- No one knows how to generate file with literal "${java.home}" content, so
+                                             we generate @{java.home}, and replace @ -> $ later.
+                                             ${java.home} should be resolved by Ant, not Maven -->
+                                        <echoxml file="${unzip.jdk.ant.build.xml}">
+                                            <project>
+                                                <unzip src="@{java.home}/../src.zip" dest="@{project.build.directory}/jdk-src" />
+                                            </project>
+                                        </echoxml>
+                                        <replace file="${unzip.jdk.ant.build.xml}" token="@" value="$" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>mvn-release-perform-staging</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>coverage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.7.5.201505241946</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

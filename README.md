@@ -14,10 +14,23 @@ ____________                            ______      _
 # Author
 Powered by Moshow郑锴@[zhengkai.blog.csdn.net](http://zhengkai.blog.csdn.net)
 
+# How to use Driver-All?
+
+### 使用方法一
+在新增连接的时候，手工编辑驱动，移除掉默认的驱动，从driver库中添加已下载的驱动。
+<img src="./setDriver.png">
+
+### 使用方法二
+把`maven`目录中中的文件复制到 `C:\Users\mosho\AppData\Roaming\DBeaverData\drivers\maven\maven-central`，默认包含了mysql、pgsql、oracle、mssql常用数据库。
+
+# How to use Aliyun Maven Image
+go to Preference -> Driver -> Maven , delete or disable all other repositories , and just add aliyun maven iamge
+`https://maven.aliyun.com/repository/central`
+
 # Version
 Dbeaver : `22.2` 
 
-# Jdbc Driver List
+# JDBC Driver List
 - athena-jdbc-custom-credentials-provider-0.0.1-SNAPSHOT.jar
 - AthenaJDBC42_2.0.25.1001.jar
 - CacheDB.jar
@@ -149,8 +162,7 @@ Dbeaver : `22.2`
 - vertica-jdbc-12.0.1-0.jar
 
 
-# PowerShell输出所有jar文件名
-to output all jar list in folder
+# PowerShell to output all jar list in folder
 ```bash
 #输出所有jar文件的文件名
 Get-ChildItem "D:\workspace\jar\dbeaver-driver-all\drivers" -Include *.jar -Recurse -Force| ForEach-Object -Process{
@@ -161,10 +173,13 @@ Get-ChildItem "D:\workspace\jar\dbeaver-driver-all\drivers" -Include *.jar -Recu
 }
 ```
 
-#Update Log
-|更新时间|版本|
+Update Log
+
+----
+
+|Date|Version|
 |----|----|
-|2022-11-06|update to 22.2|
-|2021-09-19|update to 21.2|
+|2022-11-26|update the guideline , add the maven reposritory|
+|2022-11-06|update to 22.2.0|
 |2020-10-18|update to 7.2.0|
 |2020-07-09|update to 7.1.0|
